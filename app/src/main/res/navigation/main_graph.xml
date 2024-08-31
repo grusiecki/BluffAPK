@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main_graph"
+    app:startDestination="@id/mainActivity">
+
+    <activity
+        android:id="@+id/mainActivity"
+        android:name="com.example.bluff.MainActivity"
+        android:label="MainActivity" />
+    <activity
+        android:id="@+id/pickNumberOfPlayersScreen"
+        android:name="com.example.bluff.PickNumberOfPlayersScreen"
+        android:label="PickNumberOfPlayersScreen" />
+
+    <activity
+        android:id="@+id/listOfCards"
+        android:name="com.example.bluff.ListOfCards"
+        android:label="ListOfCards" />
+    <action
+        android:id="@+id/action_global_listOfCards"
+        app:destination="@id/listOfCards" />
+    <activity
+        android:id="@+id/setPlayersNameScreen"
+        android:name="com.example.bluff.PlayerNameFlowScreen"
+        android:label="SetPlayersNameScreen" />
+</navigation>
