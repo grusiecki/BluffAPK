@@ -6,7 +6,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 
 
-
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CutCornerShape
 
@@ -32,6 +31,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import kotlinx.coroutines.delay
 import model.Card
+import model.Rankable
 
 @Composable
 fun GameScreen(
@@ -44,10 +44,12 @@ fun GameScreen(
     val playerCards = viewModel.listOfPlayers[viewModel.currentUserIndex].hand
     var currentOption by remember { mutableStateOf("") }
     var secondPairVisible by remember { mutableStateOf(false) }
-    var firstPair by remember { mutableStateOf("")}
+    var firstPair by remember { mutableStateOf("") }
     val cardWidth = remember { 100.dp }
     val aspectRatio = 0.8f
     var showPlayerCards by remember { mutableStateOf(true) }
+
+    var isEnabled = true
 
     Box(
 
@@ -95,7 +97,8 @@ fun GameScreen(
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
 
-        ) {Spacer(modifier = Modifier.height(30.dp))
+        ) {
+            Spacer(modifier = Modifier.height(30.dp))
             Text(
                 text = "Your Cards",
                 style = MaterialTheme.typography.bodyMedium,
@@ -103,28 +106,28 @@ fun GameScreen(
             )
 
             if (showPlayerCards) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                playerCards.forEach { card ->
-                    Box(
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    playerCards.forEach { card ->
+                        Box(
 
-                        modifier = Modifier
-                            .padding(4.dp) // Odstęp między kartami
-                            .weight(1f, fill = false),
-                        // Używamy fill false, aby dopasować rozmiar do zawartości
-                    ) {
-                        Image(
-                            painter = painterResource(id = card.imageResId),
-                            contentDescription = "Card",
                             modifier = Modifier
-                                .width(cardWidth)
-                                .aspectRatio(aspectRatio) // Podtrzymanie proporcji
-                        )
+                                .padding(4.dp) // Odstęp między kartami
+                                .weight(1f, fill = false),
+                            // Używamy fill false, aby dopasować rozmiar do zawartości
+                        ) {
+                            Image(
+                                painter = painterResource(id = card.imageResId),
+                                contentDescription = "Card",
+                                modifier = Modifier
+                                    .width(cardWidth)
+                                    .aspectRatio(aspectRatio) // Podtrzymanie proporcji
+                            )
+                        }
                     }
                 }
-            }
             }
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -132,49 +135,57 @@ fun GameScreen(
 
             if (currentOption.isEmpty()) {
                 toggleButtonsColumns().forEach { rowLabels ->
-                    Row(modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    )
                     {
                         rowLabels.forEach { label ->
+                            isEnabled = viewModel.lastSet.rank <= label.rank
+
                             GameButton(
-                                label, modifier = Modifier
-                                    .fillMaxWidth()
-                                    .weight(1f)
+                                label, isEnabled
                             ) {
-                                currentOption = label // Ustaw aktualnie wybraną opcję
-                                onOptionSelected(label) // Możliwość wywołania dodatkowej logiki
+                                viewModel.equalSet = viewModel.lastSet.rank == label.rank
+                                viewModel.currentSet = label
+                                currentOption =  label.str
+                                onOptionSelected(label.str)
                             }
                         }
                     }
-                   Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
             } else {
                 when (currentOption) {
-                    "1 Card", "Pair", "Three", "Four" -> {
-                        // Ta sama logika dla tych opcji
+                    "One Card", "Pair", "Three", "Four" -> {
+
                         cardOptions().forEach { rowLabels ->
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                   // .weight(1f)
+                                // .weight(1f)
 
                             )
                             {
 
                                 rowLabels.forEach { label ->
-                                    GameButton(
-                                        label, modifier = Modifier
-                                            .weight(1f)
-                                            .padding(4.dp)
-                                    ) {
-                                        showPlayerCards = false
 
-                                        currentPlayerIndexVar= afterChoosingSet(
+                                    isEnabled = if(viewModel.equalSet){
+                                        viewModel.lastFirstAnswer.rank < label.rank
+                                    }else{
+                                        true
+                                    }
+
+                                    GameButton(
+                                        label, isEnabled) {
+                                        showPlayerCards = false
+                                        viewModel.lastFirstAnswer = label
+                                        currentPlayerIndexVar = afterChoosingSet(
                                             currentPlayerIndex = currentPlayerIndexVar,
                                             navController = navController,
                                             viewModel = viewModel
                                         )
-
+                                        viewModel.lastSet=viewModel.currentSet
                                     }
                                 }
                             }
@@ -183,6 +194,7 @@ fun GameScreen(
                     }
 
                     "Two Pairs" -> {
+
                         if (firstPair.isEmpty()) {
                             Text(
                                 "First Pair",
@@ -195,17 +207,16 @@ fun GameScreen(
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        //.weight(1f)
+                                    //.weight(1f)
                                 ) {
 
 
                                     rowLabels.forEach { label ->
+                                         isEnabled = if(viewModel.equalSet){viewModel.lastFirstAnswer.rank < label.rank} else{true}
                                         GameButton(
-                                            label, modifier = Modifier
-                                                .weight(1f)
-                                                .padding(4.dp)
-                                        ) {
-                                            firstPair = label // Ustaw pierwszą parę
+                                            label, isEnabled) {
+                                            viewModel.lastFirstAnswer = label
+                                            firstPair = label.str
                                             secondPairVisible =
                                                 true // Umożliwienie wyboru drugiej pary
                                         }
@@ -214,33 +225,34 @@ fun GameScreen(
                                 Spacer(modifier = Modifier.height(16.dp))
                             }
                         } else if (secondPairVisible) {
-                            Text("Second Pair", color = Color.White,
+                            Text(
+                                "Second Pair", color = Color.White,
                                 fontSize = 24.sp,
                                 fontWeight = FontWeight.Bold,
-                                fontFamily = boldItalic)
+                                fontFamily = boldItalic
+                            )
                             cardOptions().forEach { rowLabels ->
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                       // .weight(1f)
+                                    // .weight(1f)
                                 ) {
 
                                     // Przyciski dla drugiej pary
 
 
                                     rowLabels.forEach { label ->
+                                         isEnabled = if(viewModel.equalSet){viewModel.lastSecondAnswer.rank < label.rank} else{true}
                                         GameButton(
-                                            label, modifier = Modifier
-                                                .weight(1f)
-                                                .padding(4.dp)
-                                        ) {
+                                            label, isEnabled){
+                                            viewModel.lastSecondAnswer = label
                                             showPlayerCards = false
-                                            currentPlayerIndexVar= afterChoosingSet(
+                                            currentPlayerIndexVar = afterChoosingSet(
                                                 currentPlayerIndex = currentPlayerIndexVar,
                                                 navController = navController,
                                                 viewModel = viewModel
                                             )
-
+                                            viewModel.lastSet=viewModel.currentSet
                                         }
                                     }
                                 }
@@ -250,76 +262,81 @@ fun GameScreen(
                     }
 
                     "Straight" -> {
-                        val cardOptions = listOf("Small", "Big")
+
+                        val cardOptions = listOf(model.SmallOrBig.SMALL, model.SmallOrBig.BIG)
                         cardOptions.forEach { label ->
+                             isEnabled = if(viewModel.equalSet){viewModel.lastFirstAnswer.rank < label.rank} else{true}
                             GameButton(
-                                label, modifier = Modifier
-                                    .weight(1f)
-                                    .padding(4.dp)
+                                label, isEnabled
                             ) {
+                                viewModel.lastFirstAnswer = label
                                 showPlayerCards = false
-                                currentPlayerIndexVar= afterChoosingSet(
+                                currentPlayerIndexVar = afterChoosingSet(
                                     currentPlayerIndex = currentPlayerIndexVar,
                                     navController = navController,
                                     viewModel = viewModel
                                 )
-
+                                viewModel.lastSet=viewModel.currentSet
                             }
                         }
                     }
 
                     "Full" -> {
+
                         if (firstPair.isEmpty()) {
-                            Text("Three", color = Color.White,
+                            Text(
+                                "Three", color = Color.White,
                                 fontSize = 24.sp,
                                 fontWeight = FontWeight.Bold,
-                                fontFamily = boldItalic)
+                                fontFamily = boldItalic
+                            )
                             // Przyciski dla pierwszej pary
 
                             cardOptions().forEach { rowLabels ->
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                       // .weight(1f)
+                                    // .weight(1f)
                                 ) {
                                     rowLabels.forEach { label ->
+                                         isEnabled = if(viewModel.equalSet){viewModel.lastFirstAnswer.rank < label.rank} else{true}
                                         GameButton(
-                                            label, modifier = Modifier
-                                                .weight(1f)
-                                                .padding(4.dp)
+                                            label, isEnabled
                                         ) {
-                                            firstPair = label // Ustaw pierwszą parę
+                                            viewModel.lastFirstAnswer = label
+                                            firstPair = label.str
                                             secondPairVisible =
-                                                true // Umożliwienie wyboru drugiej pary
+                                                true
                                         }
                                     }
                                 }
                                 Spacer(modifier = Modifier.height(16.dp))
                             }
                         } else if (secondPairVisible) {
-                            Text("Pair", color = Color.White,
+                            Text(
+                                "Pair", color = Color.White,
                                 fontSize = 24.sp,
                                 fontWeight = FontWeight.Bold,
-                                fontFamily = boldItalic)
+                                fontFamily = boldItalic
+                            )
                             cardOptions().forEach { rowLabels ->
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                      //  .weight(1f)
+                                    //  .weight(1f)
                                 ) {
                                     rowLabels.forEach { label ->
+                                         isEnabled = if(viewModel.equalSet){viewModel.lastFirstAnswer.rank < label.rank} else{true}
                                         GameButton(
-                                            label, modifier = Modifier
-                                                .weight(1f)
-                                                .padding(4.dp)
-                                        ) {
+                                            label, isEnabled) {
+                                            viewModel.lastSecondAnswer = label
                                             showPlayerCards = false
-                                            currentPlayerIndexVar= afterChoosingSet(
+                                            currentPlayerIndexVar = afterChoosingSet(
                                                 currentPlayerIndex = currentPlayerIndexVar,
                                                 navController = navController,
                                                 viewModel = viewModel
                                             )
-
+                                            viewModel.lastSet=viewModel.currentSet
 
                                         }
                                     }
@@ -330,61 +347,67 @@ fun GameScreen(
                     }
 
                     "Flush" -> {
-                        val suits = listOf("Hearts", "Diamonds", "Spades", "Clubs")
+
+                        val suits = listOf(model.Color.HEART,model.Color.DIAMOND, model.Color.SPADE, model.Color.CLUB)
                         suits.forEach { label ->
+                             isEnabled = if(viewModel.equalSet){viewModel.lastFirstAnswer.rank < label.rank} else{true}
                             GameButton(
-                                label, modifier = Modifier
-                                    .weight(1f)
-                                    .padding(4.dp)
+                                label, isEnabled
                             ) {
+                                viewModel.lastFirstAnswer = label
                                 showPlayerCards = false
-                                currentPlayerIndexVar= afterChoosingSet(
+                                currentPlayerIndexVar = afterChoosingSet(
                                     currentPlayerIndex = currentPlayerIndexVar,
                                     navController = navController,
                                     viewModel = viewModel
                                 )
-
+                                viewModel.lastSet=viewModel.currentSet
                             }
                         }
                     }
 
                     "Royal Flush" -> {
+
                         if (firstPair.isEmpty()) {
-                            Text("Small or Big", color = Color.White,
+                            Text(
+                                "Small or Big", color = Color.White,
                                 fontSize = 24.sp,
                                 fontWeight = FontWeight.Bold,
-                                fontFamily = boldItalic)
+                                fontFamily = boldItalic
+                            )
                             // Przyciski dla pierwszej pary
-                            val cardOptions = listOf("Small", "Big")
+                            val cardOptions = listOf(model.SmallOrBig.SMALL,model.SmallOrBig.BIG)
                             cardOptions.forEach { label ->
+                                 isEnabled = if(viewModel.equalSet){viewModel.lastFirstAnswer.rank < label.rank} else{true}
                                 GameButton(
-                                    label, modifier = Modifier
-                                        .weight(1f)
-                                        .padding(4.dp)
+                                    label, isEnabled
                                 ) {
-                                    firstPair = label // Ustaw pierwszą parę
-                                    secondPairVisible = true // Umożliwienie wyboru drugiej pary
+                                    viewModel.lastFirstAnswer = label
+                                    firstPair = label.str
+                                    secondPairVisible = true
                                 }
                             }
                         } else if (secondPairVisible) {
-                            Text("Flush", color = Color.White,
+                            Text(
+                                "Flush", color = Color.White,
                                 fontSize = 24.sp,
                                 fontWeight = FontWeight.Bold,
-                                fontFamily = boldItalic)
-                            val suits = listOf("Hearts", "Diamonds", "Spades", "Clubs")
+                                fontFamily = boldItalic
+                            )
+                            val suits = listOf(model.Color.HEART, model.Color.DIAMOND, model.Color.SPADE, model.Color.CLUB)
                             suits.forEach { label ->
+                                 isEnabled = if(viewModel.equalSet){viewModel.lastSecondAnswer.rank < label.rank} else{true}
                                 GameButton(
-                                    label, modifier = Modifier
-                                        .weight(1f)
-                                        .padding(4.dp)
+                                    label, isEnabled
                                 ) {
+                                    viewModel.lastSecondAnswer = label
                                     showPlayerCards = false
-                                    currentPlayerIndexVar= afterChoosingSet(
+                                    currentPlayerIndexVar = afterChoosingSet(
                                         currentPlayerIndex = currentPlayerIndexVar,
                                         navController = navController,
                                         viewModel = viewModel
                                     )
-
+                                    viewModel.lastSet=viewModel.currentSet
                                 }
                             }
                         }
@@ -393,8 +416,6 @@ fun GameScreen(
                 }
 
             }
-
-
 
 
         }
@@ -409,7 +430,6 @@ fun GameScreen(
                 .align(Alignment.BottomCenter)
 
 
-
         ) {
             Text("Check", color = Color.White)
         }
@@ -418,14 +438,15 @@ fun GameScreen(
 
 
 @Composable
-fun GameButton(label: String, modifier: Modifier, onOptionSelected: (String) -> Unit) {
+fun GameButton(set: Rankable,  isEnabled: Boolean, onOptionSelected: (String) -> Unit) {
     Button(
-        onClick = { onOptionSelected(label) },
+        onClick = { onOptionSelected(set.str) },
+        enabled = isEnabled,
         shape = RoundedCornerShape(8.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6200EA)), // Fioletowy
+        colors = ButtonDefaults.buttonColors(containerColor = if (isEnabled) Color(0xFF6200EA) else Color.Gray),
         modifier = Modifier.padding(4.dp)
     ) {
-        Text(label)
+        Text(set.str)
     }
 
 }
@@ -443,21 +464,24 @@ fun CheckButton(onOptionSelected: (String) -> Unit, modifier: Modifier) {
             .fillMaxHeight(0.5f)
 
 
-
     ) {
         Text("Check", color = Color.White)
     }
 }
 
 
-fun afterChoosingSet(currentPlayerIndex: Int, viewModel: GameViewModel, navController: NavController): Int{
+fun afterChoosingSet(
+    currentPlayerIndex: Int,
+    viewModel: GameViewModel,
+    navController: NavController
+): Int {
     var currentPlayerIndexVar: Int = currentPlayerIndex
-    if (currentPlayerIndex +1 < viewModel.listOfPlayers.size) {
+    if (currentPlayerIndex + 1 < viewModel.listOfPlayers.size) {
         currentPlayerIndexVar++
         viewModel.setCurrentUserIndex(currentPlayerIndexVar)
 
 
-            navController.navigate("playerScreen") // Teraz przejdź do kolejnego gracza
+        navController.navigate("playerScreen") // Teraz przejdź do kolejnego gracza
 
         navController.navigate("playerScreen")
     } else {
@@ -468,15 +492,15 @@ fun afterChoosingSet(currentPlayerIndex: Int, viewModel: GameViewModel, navContr
 }
 
 fun toggleButtonsColumns() = listOf(
-    listOf("1 Card", "Pair","Two Pairs"),
-    listOf("Three","Straight", "Full"),
-    listOf("Four", "Flush","Royal Flush"),
+    listOf(model.Set.ONECARD, model.Set.PAIR, model.Set.TWOPAIRS),
+    listOf(model.Set.THREE, model.Set.STRAIGHT, model.Set.FULL),
+    listOf(model.Set.FOUR, model.Set.FLUSH, model.Set.ROYALFLUSH),
 
-)
+    )
 
 fun cardOptions() = listOf(
-    listOf("Nine", "Ten", "Jack", "Queen"),
-    listOf("King", "Ace")
+    listOf(model.Figure.NINE, model.Figure.TEN, model.Figure.JACK, model.Figure.QUEEN),
+    listOf(model.Figure.KING, model.Figure.ACE)
 )
 
 

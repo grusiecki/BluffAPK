@@ -48,15 +48,40 @@ fun PlayerScreen(viewModel: GameViewModel, navController: NavController) {
         ) {
             Text(
                 text = viewModel.listOfPlayers[viewModel.currentUserIndex].name,
-                fontSize = 24.sp, // Ustaw rozmiar tekstu na 24 sp
-                fontWeight = FontWeight.Bold, // Ustaw wagę tekstu na pogrubioną
+                fontSize = 48.sp,
+                fontWeight = FontWeight.Bold,
                 fontFamily = boldItalic,
                 color = Color.White
             )
+            if(viewModel.lastFirstAnswer != model.Figure.EIGHT){
+            Text(
+                text = viewModel.lastSet.str,
+                fontSize = 32.sp,
+                fontWeight = FontWeight.Bold,
+                fontFamily = boldItalic,
+                color = Color.White
+            )
+                Text(
+                    text = viewModel.lastFirstAnswer.str,
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = boldItalic,
+                    color = Color.White
+                )
+                if(viewModel.lastSet == model.Set.ROYALFLUSH || viewModel.lastSet == model.Set.FULL || viewModel.lastSet == model.Set.TWOPAIRS){
+                Text(
+                    text = viewModel.lastSecondAnswer.str,
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = boldItalic,
+                    color = Color.White
+                )}
+            }
+
             Text(
                 text = "Ready? click on the screen",
-                fontSize = 24.sp, // Ustaw rozmiar tekstu na 24 sp
-                fontWeight = FontWeight.Bold, // Ustaw wagę tekstu na pogrubioną
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
                 fontFamily = boldItalic,
                 color = Color.White
             )

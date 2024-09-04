@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import model.Card
 import model.Deck
+import model.Rankable
 import org.example.Player
 
 class GameViewModel : ViewModel() {
@@ -16,7 +17,13 @@ class GameViewModel : ViewModel() {
     private var _listOfPlayers = mutableStateListOf<Player>()
     var listOfPlayers: List<Player> = _listOfPlayers
     val listOfCards: ArrayList<Card> = ArrayList()
-
+    var lastSet: Rankable = model.Set.ONECARD
+    var lastFirstAnswer: Rankable = model.Figure.EIGHT
+    var lastSecondAnswer: Rankable = model.Figure.EIGHT
+    var currentSet: Rankable = model.Set.ONECARD
+    var currentFirstAnswer: Rankable = model.Figure.EIGHT
+    var currentSecondAnswer: Rankable = model.Figure.EIGHT
+    var equalSet: Boolean = false
 
 
 

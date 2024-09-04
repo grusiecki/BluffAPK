@@ -15,11 +15,7 @@ class TwoPairs: CheckIfExist() {
         val occurrences1 = listOfFigures.count{it == figure1}
         val occurrences2 = listOfFigures.count{it == figure2}
 
-        contain = if(occurrences1 >= 2 && occurrences2>=2){
-            true
-        }else{
-            false
-        }
+        contain = occurrences1 >= 2 && occurrences2>=2
         return contain
     }
 }

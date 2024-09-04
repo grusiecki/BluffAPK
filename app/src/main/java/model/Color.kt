@@ -1,5 +1,5 @@
 package model
 
-enum class Color(var rank: Int, var str: String) {
-    HEART(3, "heart"), DIAMOND(2, "diamond"), SPADE(1, "spade"), CLUB(0, "club");
+enum class Color(override var rank: Int, override var str: String): Rankable {
+    HEART(3, "Heart"), DIAMOND(2, "Diamond"), SPADE(1, "Spade"), CLUB(0, "Club");
 }

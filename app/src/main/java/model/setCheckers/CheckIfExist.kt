@@ -39,4 +39,45 @@ abstract class CheckIfExist {
     }
 
     abstract fun check(listOfCards: ArrayList<Card>, answer1: String, answer2: String): Boolean
+    fun biggerOrSmallerSet(before: model.Set, new: model.Set): Int {
+        var rankBefore = 0;
+        var rankNew = 0;
+
+        rankBefore = before.rank;
+        rankNew = new.rank;
+        if (rankBefore > rankNew) {
+            return 0
+        } else if (rankBefore == rankNew) {
+            return 1
+        } else {
+            return 2
+        }
+
+    }
+
+    fun biggerOrSmallerCard(before: Figure, new: Figure): Int {
+        var rankBefore = 0;
+        var rankNew = 0;
+        rankBefore = before!!.rank;
+        rankNew = new!!.rank;
+        if (rankBefore > rankNew) {
+            return 0
+        } else if (rankBefore == rankNew) {
+            return 1
+        } else {
+            return 2
+        }
+    }
+
+    fun biggerOrSmallerColor(before: model.Color, new: model.Color): Int {
+        var rankBefore = 0;
+        var rankNew = 0;
+        rankBefore = before.rank;
+        rankNew = new.rank;
+        if (rankBefore >= rankNew) {
+            return 0
+        } else {
+            return 1
+        }
+    }
 }
