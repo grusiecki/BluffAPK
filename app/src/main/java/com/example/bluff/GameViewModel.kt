@@ -14,6 +14,8 @@ class GameViewModel : ViewModel() {
 //    val playerNames: List<String> get() = _playerNames
     private var _currentUserIndex: Int = 0
     val currentUserIndex: Int get() = _currentUserIndex
+    private var _previousUserIndex: Int = 0
+    val previousUserIndex: Int get() = _previousUserIndex
     private var _listOfPlayers = mutableStateListOf<Player>()
     var listOfPlayers: List<Player> = _listOfPlayers
     val listOfCards: ArrayList<Card> = ArrayList()
@@ -21,13 +23,15 @@ class GameViewModel : ViewModel() {
     var lastFirstAnswer: Rankable = model.Figure.EIGHT
     var lastSecondAnswer: Rankable = model.Figure.EIGHT
     var currentSet: Rankable = model.Set.ONECARD
-    var currentFirstAnswer: Rankable = model.Figure.EIGHT
-    var currentSecondAnswer: Rankable = model.Figure.EIGHT
     var equalSet: Boolean = false
-
+    var setExist: Boolean = false
+    var loosingPlayer: Player = Player()
 
 
     fun setCurrentUserIndex(index: Int) {
+        _currentUserIndex = index
+    }
+    fun setPreviousUserIndex(index: Int) {
         _currentUserIndex = index
     }
     fun setListOfPlayers(playerName: String ){
@@ -37,6 +41,8 @@ class GameViewModel : ViewModel() {
             player.name = playerName
             player.numberOfCards = 1
             _listOfPlayers.add(player)
+    } fun removePlayer(player: Player){
+        _listOfPlayers.remove(player)
     }
      fun setCards(deck: Deck) {
         deck.deck.shuffle()

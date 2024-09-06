@@ -112,6 +112,10 @@ fun AppNavigator() {
 
             PlayerScreen(viewModel, navController)
         }
+        composable("whoLooseScreen") {
+
+            WhoLooseScreen(viewModel, navController)
+        }
         }
 
     }

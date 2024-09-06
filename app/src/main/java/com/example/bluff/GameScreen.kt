@@ -30,8 +30,10 @@ import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import kotlinx.coroutines.delay
+import model.AfterCheck
 import model.Card
 import model.Rankable
+import org.example.Player
 
 @Composable
 fun GameScreen(
@@ -48,6 +50,7 @@ fun GameScreen(
     val cardWidth = remember { 100.dp }
     val aspectRatio = 0.8f
     var showPlayerCards by remember { mutableStateOf(true) }
+
 
     var isEnabled = true
 
@@ -420,7 +423,15 @@ fun GameScreen(
 
         }
         Button(
-            onClick = { onOptionSelected("Check") },
+            onClick = { onOptionSelected("Check")
+                      val afterCheck = AfterCheck()
+                      val pair = afterCheck.checkIfExist(viewModel.currentSet, viewModel.lastFirstAnswer, viewModel.lastSecondAnswer, viewModel.listOfPlayers[viewModel.previousUserIndex], viewModel.listOfPlayers[viewModel.currentUserIndex], viewModel.listOfCards,)
+                        viewModel.setExist = pair.second
+                        viewModel.loosingPlayer = pair.first
+                navController.navigate("whoLooseScreen")
+                      }
+
+            ,
             shape = CutCornerShape(50),
             colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
             modifier = Modifier
@@ -476,14 +487,15 @@ fun afterChoosingSet(
     navController: NavController
 ): Int {
     var currentPlayerIndexVar: Int = currentPlayerIndex
+    viewModel.setPreviousUserIndex(currentPlayerIndexVar)
     if (currentPlayerIndex + 1 < viewModel.listOfPlayers.size) {
         currentPlayerIndexVar++
         viewModel.setCurrentUserIndex(currentPlayerIndexVar)
 
 
-        navController.navigate("playerScreen") // Teraz przejdź do kolejnego gracza
-
         navController.navigate("playerScreen")
+
+       // navController.navigate("playerScreen")
     } else {
         viewModel.setCurrentUserIndex(0)
         navController.navigate("playerScreen")

@@ -2,9 +2,10 @@ package org.example.setCheckers
 
 import model.Card
 import model.Figure
+import model.Rankable
 
 class Straight : CheckIfExist() {
-    override fun check(listOfCards: ArrayList<Card>, answer1: String, answer2: String): Boolean {
+    override fun check(listOfCards: ArrayList<Card>, answer1: Rankable, answer2: Rankable): Boolean {
         val listOfFigures = ArrayList<Figure>()
         var contain: Boolean = false
         for (card1 in listOfCards) {
@@ -21,9 +22,9 @@ class Straight : CheckIfExist() {
                 king
             )
         ) {
-            if (answer1 == "small") {
+            if (answer1.str == "Small") {
                 contain = listOfFigures.contains(nine)
-            } else if (answer1 == "big") {
+            } else if (answer1.str == "Big") {
                 contain = listOfFigures.contains(ace)
             }
         } else {

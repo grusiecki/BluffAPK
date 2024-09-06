@@ -3,6 +3,7 @@ package org.example.setCheckers
 import model.Card
 import model.Color
 import model.Figure
+import model.Rankable
 import org.example.Player
 
 abstract class CheckIfExist {
@@ -38,7 +39,7 @@ abstract class CheckIfExist {
         return color;
     }
 
-    abstract fun check(listOfCards: ArrayList<Card>, answer1: String, answer2: String): Boolean
+    abstract fun check(listOfCards: ArrayList<Card>, answer1: Rankable, answer2: Rankable): Boolean
     fun biggerOrSmallerSet(before: model.Set, new: model.Set): Int {
         var rankBefore = 0;
         var rankNew = 0;
