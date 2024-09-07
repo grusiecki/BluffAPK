@@ -21,7 +21,9 @@ import androidx.navigation.NavController
 
 @Composable
 fun PlayerScreen(viewModel: GameViewModel, navController: NavController) {
-    val playerName = viewModel.listOfPlayers[viewModel.currentUserIndex].name
+    if(viewModel.ifDeleteFlag){
+         viewModel.removePlayer(viewModel.loosingPlayer)
+    }
 
     Box(
 

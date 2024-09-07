@@ -18,9 +18,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import model.Deck
 
 @Composable
 fun WhoLooseScreen(viewModel: GameViewModel, navController: NavController) {
+    var looserIndex: Int = viewModel.listOfPlayers.indexOf(viewModel.loosingPlayer)
+     viewModel.ifDeleteFlag = false
     Box(
 
         modifier = Modifier
@@ -39,14 +42,15 @@ fun WhoLooseScreen(viewModel: GameViewModel, navController: NavController) {
             modifier = Modifier
                 .fillMaxSize()
                 .clickable {
-                    viewModel.setCurrentUserIndex(viewModel.listOfPlayers.indexOf(viewModel.loosingPlayer))
-                    //TODO adding exception when player loose
+                    viewModel.setCurrentUserIndex(looserIndex)
+
                     viewModel.listOfCards.clear()
                     viewModel.lastSet = model.Set.ONECARD
                     viewModel.lastFirstAnswer = model.Figure.EIGHT
                     viewModel.lastSecondAnswer = model.Figure.EIGHT
                     viewModel.currentSet = model.Set.ONECARD
-//TODO set a new cards
+                    val deck = Deck()
+                    viewModel.setCards(deck)
                     navController.navigate("playerScreen")
                 }
                 .padding(16.dp),
@@ -63,13 +67,17 @@ fun WhoLooseScreen(viewModel: GameViewModel, navController: NavController) {
             )
             if(viewModel.loosingPlayer.numberOfCards > 5) {
                 Text(
-                    text = viewModel.loosingPlayer.name + "IS LOOSING THE GAME!\"",
+                    text = viewModel.loosingPlayer.name + " IS LOOSING THE GAME!",
                     fontSize = 48.sp,
                     fontWeight = FontWeight.Bold,
                     fontFamily = boldItalic,
                     color = Color.White
                 )
-                viewModel.removePlayer(viewModel.loosingPlayer)
+                if(looserIndex == viewModel.listOfPlayers.size -1){
+                    looserIndex = 0
+                }
+
+                viewModel.ifDeleteFlag = true
             }
             Text(
 
@@ -99,7 +107,7 @@ fun WhoLooseScreen(viewModel: GameViewModel, navController: NavController) {
             }
             if (viewModel.setExist) {
                 Text(
-//TODO check why shows not exist when exist
+
                     text = "EXIST",
                     fontSize = 48.sp,
                     fontWeight = FontWeight.Bold,

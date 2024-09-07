@@ -26,13 +26,13 @@ class GameViewModel : ViewModel() {
     var equalSet: Boolean = false
     var setExist: Boolean = false
     var loosingPlayer: Player = Player()
-
+    var ifDeleteFlag = false
 
     fun setCurrentUserIndex(index: Int) {
         _currentUserIndex = index
     }
     fun setPreviousUserIndex(index: Int) {
-        _currentUserIndex = index
+        _previousUserIndex = index
     }
     fun setListOfPlayers(playerName: String ){
 
