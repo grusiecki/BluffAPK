@@ -54,6 +54,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MyScreen(navController: NavController) {
+
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -93,7 +94,7 @@ fun AppNavigator() {
 
         composable("mainScreen") { MyScreen(navController) }
         composable("pickNumberOfPlayersScreen") { PickNumberOfPlayer(navController) }
-        composable("listOfCards"){ListOfCardsScreen(navController)}
+
         composable(
             "setPlayersName/{playerCount}",
             arguments = listOf(navArgument("playerCount") { type = NavType.IntType })
@@ -115,6 +116,10 @@ fun AppNavigator() {
         composable("whoLooseScreen") {
 
             WhoLooseScreen(viewModel, navController)
+        }
+        composable("allCardsScreen") {
+
+            AllCardsScreen( navController, viewModel)
         }
         }
 

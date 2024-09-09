@@ -24,6 +24,8 @@ fun PlayerScreen(viewModel: GameViewModel, navController: NavController) {
     if(viewModel.ifDeleteFlag){
          viewModel.removePlayer(viewModel.loosingPlayer)
     }
+    val currentUserName = viewModel.listOfPlayers[viewModel.currentUserIndex].name
+
 
     Box(
 
@@ -49,7 +51,7 @@ fun PlayerScreen(viewModel: GameViewModel, navController: NavController) {
 
         ) {
             Text(
-                text = viewModel.listOfPlayers[viewModel.currentUserIndex].name,
+                text = currentUserName,
                 fontSize = 48.sp,
                 fontWeight = FontWeight.Bold,
                 fontFamily = boldItalic,

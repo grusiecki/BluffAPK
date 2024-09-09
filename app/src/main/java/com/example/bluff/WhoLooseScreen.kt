@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -41,18 +42,6 @@ fun WhoLooseScreen(viewModel: GameViewModel, navController: NavController) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .clickable {
-                    viewModel.setCurrentUserIndex(looserIndex)
-
-                    viewModel.listOfCards.clear()
-                    viewModel.lastSet = model.Set.ONECARD
-                    viewModel.lastFirstAnswer = model.Figure.EIGHT
-                    viewModel.lastSecondAnswer = model.Figure.EIGHT
-                    viewModel.currentSet = model.Set.ONECARD
-                    val deck = Deck()
-                    viewModel.setCards(deck)
-                    navController.navigate("playerScreen")
-                }
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
@@ -125,13 +114,27 @@ fun WhoLooseScreen(viewModel: GameViewModel, navController: NavController) {
                 )
             }
 
-            Text(
-                text = "Click on the screen to continue",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                fontFamily = boldItalic,
-                color = Color.White
-            )
+            Button(onClick = {
+                navController.navigate("allCardsScreen")
+            }) {
+                Text("Show all cards")
+            }
+            Button(onClick = {
+                viewModel.setCurrentUserIndex(looserIndex)
+
+                viewModel.listOfCards.clear()
+                viewModel.lastSet = model.Set.ONECARD
+                viewModel.lastFirstAnswer = model.Figure.EIGHT
+                viewModel.lastSecondAnswer = model.Figure.EIGHT
+                viewModel.currentSet = model.Set.ONECARD
+                val deck = Deck()
+                viewModel.setCards(deck)
+                navController.navigate("playerScreen")
+
+            }) {
+
+                Text("Continue")
+            }
         }
     }
 }

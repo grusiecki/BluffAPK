@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -50,9 +51,11 @@ fun GameScreen(
     val cardWidth = remember { 100.dp }
     val aspectRatio = 0.8f
     var showPlayerCards by remember { mutableStateOf(true) }
+    var showDialog by remember { mutableStateOf(false) }
 
 
     var isEnabled = true
+    val isEnabledCheck =viewModel.lastFirstAnswer != model.Figure.EIGHT
 
     Box(
 
@@ -92,6 +95,53 @@ fun GameScreen(
                 modifier = Modifier.scale(1.5f)
             )
         }
+        IconButton(
+                onClick = { showDialog = true },
+        modifier = Modifier
+            .align(Alignment.TopEnd) // Pozycjonowanie na górze po prawej
+            .padding(16.dp)
+            .size(48.dp)
+            .clip(CircleShape)
+            .background(Color.White)
+            .border(2.dp, Color.Black, CircleShape)
+        ) {
+        Icon(
+            imageVector = Icons.Default.Close,
+            contentDescription = "Close",
+            tint = Color.Red
+        )
+    }
+
+        // Dialog wyjścia z gry
+        if (showDialog) {
+            AlertDialog(
+                onDismissRequest = { showDialog = false },
+                title = { Text(text = "Exit Game") },
+                text = { Text(text = "Are you sure you want to quit?") },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            showDialog = false
+
+                            navController.navigate("mainScreen") {
+                                popUpTo("mainScreen") { inclusive = true }
+                            }
+                            viewModel.resetData()
+                        }
+                    ) {
+                        Text("Yes")
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = { showDialog = false }
+                    ) {
+                        Text("No")
+                    }
+                }
+            )
+        }
+
 
 
         Column(
@@ -117,9 +167,9 @@ fun GameScreen(
                         Box(
 
                             modifier = Modifier
-                                .padding(4.dp) // Odstęp między kartami
+                                .padding(4.dp)
                                 .weight(1f, fill = false),
-                            // Używamy fill false, aby dopasować rozmiar do zawartości
+
                         ) {
                             Image(
                                 painter = painterResource(id = card.imageResId),
@@ -378,7 +428,7 @@ fun GameScreen(
                                 fontWeight = FontWeight.Bold,
                                 fontFamily = boldItalic
                             )
-                            // Przyciski dla pierwszej pary
+
                             val cardOptions = listOf(model.SmallOrBig.SMALL,model.SmallOrBig.BIG)
                             cardOptions.forEach { label ->
                                  isEnabled = if(viewModel.equalSet){viewModel.lastFirstAnswer.rank < label.rank} else{true}
@@ -426,6 +476,7 @@ fun GameScreen(
             onClick = { onOptionSelected("Check")
                       val afterCheck = AfterCheck()
                       val pair = afterCheck.checkIfExist(viewModel.currentSet, viewModel.lastFirstAnswer, viewModel.lastSecondAnswer, viewModel.listOfPlayers[viewModel.previousUserIndex], viewModel.listOfPlayers[viewModel.currentUserIndex], viewModel.listOfCards,)
+
                         viewModel.setExist = pair.second
                         viewModel.loosingPlayer = pair.first
                 navController.navigate("whoLooseScreen")
@@ -433,7 +484,8 @@ fun GameScreen(
 
             ,
             shape = CutCornerShape(50),
-            colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
+            enabled = isEnabledCheck,
+            colors = ButtonDefaults.buttonColors(containerColor = if (isEnabled) Color.Red else Color.Gray),
             modifier = Modifier
                 .fillMaxWidth(0.5f)
                 .padding(16.dp)
@@ -463,22 +515,7 @@ fun GameButton(set: Rankable,  isEnabled: Boolean, onOptionSelected: (String) ->
 }
 
 
-@Composable
-fun CheckButton(onOptionSelected: (String) -> Unit, modifier: Modifier) {
-    Button(
-        onClick = { onOptionSelected("Check") },
-        shape = CutCornerShape(50),
-        colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
-        modifier = Modifier
-            .fillMaxWidth(0.5f)
-            .padding(4.dp)
-            .fillMaxHeight(0.5f)
 
-
-    ) {
-        Text("Check", color = Color.White)
-    }
-}
 
 
 fun afterChoosingSet(
@@ -495,7 +532,7 @@ fun afterChoosingSet(
 
         navController.navigate("playerScreen")
 
-       // navController.navigate("playerScreen")
+
     } else {
         viewModel.setCurrentUserIndex(0)
         navController.navigate("playerScreen")
@@ -516,17 +553,4 @@ fun cardOptions() = listOf(
 )
 
 
-//@Preview(showBackground = true)
-//@Composable
-//fun GameScreenPreview() {
-//    val dummyCards = listOf(
-//        R.drawable.ace_karo, // Zamień te zasoby na rzeczywiste karty
-//        R.drawable.king_kier,
-//        R.drawable.queen_pik,
-//        R.drawable.jack_trefl,
-//        R.drawable.ten_karo
-//    )
-//    GameScreen(playerCards = dummyCards) {
-//        println("Selected Option: $it")
-//    }
-//}
+

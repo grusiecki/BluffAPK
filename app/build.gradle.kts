@@ -52,8 +52,8 @@ android {
 dependencies {
 
     implementation("androidx.core:core-ktx:1.13.1")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.4")
-    implementation("androidx.activity:activity-compose:1.9.1")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.5")
+    implementation("androidx.activity:activity-compose:1.9.2")
     implementation(platform("androidx.compose:compose-bom:2023.08.00"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
@@ -66,8 +66,9 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
-    implementation("androidx.compose.ui:ui-text-google-fonts:1.6.8")
-    implementation("androidx.navigation:navigation-compose:2.7.7")
+    implementation("androidx.compose.ui:ui-text-google-fonts:1.7.0")
+    implementation("androidx.navigation:navigation-compose:2.8.0")
+    implementation("androidx.compose.foundation:foundation:1.7.0")
 
 
 

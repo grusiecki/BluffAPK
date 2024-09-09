@@ -24,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -53,9 +54,15 @@ class PlayerNameFlowScreen : ComponentActivity() {
 
 @Composable
 fun PlayerNameFlow(navController: NavController, playerCount: Int, viewModel: GameViewModel) {
-    var currentPlayerIndex by remember { mutableStateOf(0) }
+    var currentPlayerIndex by remember { mutableIntStateOf(viewModel.currentUserIndex) }
     val playerNames = remember { mutableListOf<String>() }
+    if(viewModel.resetState){
 
+        playerNames.clear()
+        currentPlayerIndex = 0
+        viewModel.resetListOfPlayers()
+        viewModel.resetState = false
+    }
     if (currentPlayerIndex < playerCount) {
         PlayerNameInputScreen(
             playerNumber = currentPlayerIndex + 1, navController
