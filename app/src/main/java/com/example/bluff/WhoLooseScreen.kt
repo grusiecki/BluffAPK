@@ -24,7 +24,8 @@ import model.Deck
 @Composable
 fun WhoLooseScreen(viewModel: GameViewModel, navController: NavController) {
     var looserIndex: Int = viewModel.listOfPlayers.indexOf(viewModel.loosingPlayer)
-     viewModel.ifDeleteFlag = false
+
+    val loosingPlayerName = viewModel.loosingPlayer.name
     Box(
 
         modifier = Modifier
@@ -48,7 +49,7 @@ fun WhoLooseScreen(viewModel: GameViewModel, navController: NavController) {
 
         ) {
             Text(
-                text = viewModel.loosingPlayer.name + " LOOSE!",
+                text = "$loosingPlayerName LOOSE!",
                 fontSize = 48.sp,
                 fontWeight = FontWeight.Bold,
                 fontFamily = boldItalic,
@@ -56,7 +57,7 @@ fun WhoLooseScreen(viewModel: GameViewModel, navController: NavController) {
             )
             if(viewModel.loosingPlayer.numberOfCards > 5) {
                 Text(
-                    text = viewModel.loosingPlayer.name + " IS LOOSING THE GAME!",
+                    text = "$loosingPlayerName LOOSE!",
                     fontSize = 48.sp,
                     fontWeight = FontWeight.Bold,
                     fontFamily = boldItalic,
@@ -66,7 +67,6 @@ fun WhoLooseScreen(viewModel: GameViewModel, navController: NavController) {
                     looserIndex = 0
                 }
 
-                viewModel.ifDeleteFlag = true
             }
             Text(
 
@@ -129,7 +129,17 @@ fun WhoLooseScreen(viewModel: GameViewModel, navController: NavController) {
                 viewModel.currentSet = model.Set.ONECARD
                 val deck = Deck()
                 viewModel.setCards(deck)
+                if(viewModel.loosingPlayer.numberOfCards > 5) {
+                    viewModel.removePlayer(viewModel.loosingPlayer)
+                    if(looserIndex == viewModel.listOfPlayers.size -1){
+                        looserIndex = 0
+                    }
+                }
+                if(viewModel.listOfPlayers.size >1){
                 navController.navigate("playerScreen")
+                }else{
+                    navController.navigate("endGameScreen")
+                }
 
             }) {
 

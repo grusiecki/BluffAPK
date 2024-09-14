@@ -20,19 +20,16 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 
 @Composable
-fun PlayerScreen(viewModel: GameViewModel, navController: NavController) {
-
-    val currentUserName = viewModel.listOfPlayers[viewModel.currentUserIndex].name
+fun EndGameScreen(navController: NavController, viewModel: GameViewModel) {
 
 
     Box(
 
         modifier = Modifier
             .fillMaxSize()
-
+        //  .padding(paddingValues)
 
     ) {
-
         Image(
             painter = painterResource(id = R.drawable.background),
             contentDescription = null,
@@ -42,51 +39,40 @@ fun PlayerScreen(viewModel: GameViewModel, navController: NavController) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .clickable { navController.navigate("gameScreen") } // On click navigate to gameScreen
-                .padding(16.dp),
+                .padding(16.dp)
+                .clickable {
+                    navController.navigate("mainScreen")
+                },
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
 
         ) {
+
             Text(
-                text = currentUserName,
-                fontSize = 48.sp,
-                fontWeight = FontWeight.Bold,
-                fontFamily = boldItalic,
-                color = Color.White
-            )
-            if(viewModel.lastFirstAnswer != model.Figure.EIGHT){
-            Text(
-                text = viewModel.lastSet.str,
+
+                text = "THE END",
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Bold,
                 fontFamily = boldItalic,
                 color = Color.White
             )
-                Text(
-                    text = viewModel.lastFirstAnswer.str,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = boldItalic,
-                    color = Color.White
-                )
-                if(viewModel.lastSet == model.Set.ROYALFLUSH || viewModel.lastSet == model.Set.FULL || viewModel.lastSet == model.Set.TWOPAIRS){
-                Text(
-                    text = viewModel.lastSecondAnswer.str,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = boldItalic,
-                    color = Color.White
-                )}
-            }
-
             Text(
-                text = "Ready? click on the screen",
+
+                text = viewModel.listOfPlayers[0].name + " NOT LOOSE",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 fontFamily = boldItalic,
                 color = Color.White
             )
+            Text(
+
+                text = "Click to back to main menu",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                fontFamily = boldItalic,
+                color = Color.White
+            )
         }
+
     }
 }

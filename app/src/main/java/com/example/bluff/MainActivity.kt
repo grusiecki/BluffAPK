@@ -71,13 +71,13 @@ fun MyScreen(navController: NavController) {
         ) {
             Text(
                 text = "Welcome to the Bluff",
-                fontSize = 24.sp, // Ustaw rozmiar tekstu na 24 sp
-                fontWeight = FontWeight.Bold, // Ustaw wagę tekstu na pogrubioną
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
                 fontFamily = boldItalic,
                 color = Color.White
             )
 
-            Spacer(modifier = Modifier.height(16.dp)) // Odstęp między tekstem a przyciskiem
+            Spacer(modifier = Modifier.height(16.dp))
 
             Button(onClick = { navController.navigate("pickNumberOfPlayersScreen")}) {
                 Text(text = "Start Game")
@@ -120,6 +120,10 @@ fun AppNavigator() {
         composable("allCardsScreen") {
 
             AllCardsScreen( navController, viewModel)
+        }
+        composable("endGameScreen") {
+
+            EndGameScreen( navController, viewModel)
         }
         }
 

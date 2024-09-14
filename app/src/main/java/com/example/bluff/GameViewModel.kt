@@ -26,7 +26,7 @@ class GameViewModel : ViewModel() {
     var equalSet: Boolean = false
     var setExist: Boolean = false
     var loosingPlayer: Player = Player()
-    var ifDeleteFlag = false
+
     var resetState: Boolean = true
 
     fun setCurrentUserIndex(index: Int) {
@@ -47,6 +47,7 @@ class GameViewModel : ViewModel() {
     }
 
     fun removePlayer(player: Player) {
+        loosingPlayer = listOfPlayers[0]
         _listOfPlayers.remove(player)
     }
 
