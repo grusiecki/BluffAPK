@@ -33,7 +33,9 @@ import androidx.navigation.NavController
 import kotlinx.coroutines.delay
 import model.AfterCheck
 import model.Card
+import model.Figure
 import model.Rankable
+import model.SmallOrBig
 import org.example.Player
 
 @Composable
@@ -52,6 +54,8 @@ fun GameScreen(
     val aspectRatio = 0.8f
     var showPlayerCards by remember { mutableStateOf(true) }
     var showDialog by remember { mutableStateOf(false) }
+    var tempFirstAnswer: Figure = Figure.EIGHT
+    var tempFirstAnswerInFlush: SmallOrBig = SmallOrBig.SMALLER
 
 
     var isEnabled = true
@@ -268,7 +272,8 @@ fun GameScreen(
                                          isEnabled = if(viewModel.equalSet){viewModel.lastFirstAnswer.rank < label.rank} else{true}
                                         GameButton(
                                             label, isEnabled) {
-                                            viewModel.lastFirstAnswer = label
+                                            tempFirstAnswer = label
+//                                            viewModel.lastFirstAnswer = label
                                             firstPair = label.str
                                             secondPairVisible =
                                                 true // Umożliwienie wyboru drugiej pary
@@ -298,6 +303,7 @@ fun GameScreen(
                                          isEnabled = if(viewModel.equalSet){viewModel.lastSecondAnswer.rank < label.rank} else{true}
                                         GameButton(
                                             label, isEnabled){
+                                            viewModel.lastFirstAnswer = tempFirstAnswer
                                             viewModel.lastSecondAnswer = label
                                             showPlayerCards = false
                                             currentPlayerIndexVar = afterChoosingSet(
@@ -356,7 +362,8 @@ fun GameScreen(
                                         GameButton(
                                             label, isEnabled
                                         ) {
-                                            viewModel.lastFirstAnswer = label
+                                            tempFirstAnswer = label
+                                           // viewModel.lastFirstAnswer = label
                                             firstPair = label.str
                                             secondPairVisible =
                                                 true
@@ -382,6 +389,7 @@ fun GameScreen(
                                          isEnabled = if(viewModel.equalSet){viewModel.lastFirstAnswer.rank < label.rank} else{true}
                                         GameButton(
                                             label, isEnabled) {
+                                            viewModel.lastFirstAnswer = tempFirstAnswer
                                             viewModel.lastSecondAnswer = label
                                             showPlayerCards = false
                                             currentPlayerIndexVar = afterChoosingSet(
@@ -435,7 +443,8 @@ fun GameScreen(
                                 GameButton(
                                     label, isEnabled
                                 ) {
-                                    viewModel.lastFirstAnswer = label
+                                    tempFirstAnswerInFlush=label
+                                    //viewModel.lastFirstAnswer = label
                                     firstPair = label.str
                                     secondPairVisible = true
                                 }
@@ -453,6 +462,7 @@ fun GameScreen(
                                 GameButton(
                                     label, isEnabled
                                 ) {
+                                    viewModel.lastFirstAnswer = tempFirstAnswerInFlush
                                     viewModel.lastSecondAnswer = label
                                     showPlayerCards = false
                                     currentPlayerIndexVar = afterChoosingSet(
