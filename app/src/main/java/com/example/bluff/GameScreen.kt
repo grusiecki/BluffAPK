@@ -54,12 +54,12 @@ fun GameScreen(
     val aspectRatio = 0.8f
     var showPlayerCards by remember { mutableStateOf(true) }
     var showDialog by remember { mutableStateOf(false) }
-    var tempFirstAnswer: Figure = Figure.EIGHT
-    var tempFirstAnswerInFlush: SmallOrBig = SmallOrBig.SMALLER
+
+    var biggerPair: Rankable = Figure.EIGHT
 
 
     var isEnabled = true
-    val isEnabledCheck =viewModel.lastFirstAnswer != model.Figure.EIGHT
+    val isEnabledCheck = viewModel.lastFirstAnswer != model.Figure.EIGHT
 
     Box(
 
@@ -78,10 +78,11 @@ fun GameScreen(
         IconButton(
             onClick = {
                 if (currentOption.isEmpty()) {
+                    firstPair = ""
                     navController.popBackStack()
                 } else {
                     currentOption = ""
-
+                    firstPair = ""
                 }
             },
             modifier = Modifier
@@ -100,21 +101,21 @@ fun GameScreen(
             )
         }
         IconButton(
-                onClick = { showDialog = true },
-        modifier = Modifier
-            .align(Alignment.TopEnd) // Pozycjonowanie na górze po prawej
-            .padding(16.dp)
-            .size(48.dp)
-            .clip(CircleShape)
-            .background(Color.White)
-            .border(2.dp, Color.Black, CircleShape)
+            onClick = { showDialog = true },
+            modifier = Modifier
+                .align(Alignment.TopEnd) // Pozycjonowanie na górze po prawej
+                .padding(16.dp)
+                .size(48.dp)
+                .clip(CircleShape)
+                .background(Color.White)
+                .border(2.dp, Color.Black, CircleShape)
         ) {
-        Icon(
-            imageVector = Icons.Default.Close,
-            contentDescription = "Close",
-            tint = Color.Red
-        )
-    }
+            Icon(
+                imageVector = Icons.Default.Close,
+                contentDescription = "Close",
+                tint = Color.Red
+            )
+        }
 
         // Dialog wyjścia z gry
         if (showDialog) {
@@ -174,7 +175,7 @@ fun GameScreen(
                                 .padding(4.dp)
                                 .weight(1f, fill = false),
 
-                        ) {
+                            ) {
                             Image(
                                 painter = painterResource(id = card.imageResId),
                                 contentDescription = "Card",
@@ -205,7 +206,7 @@ fun GameScreen(
                             ) {
                                 viewModel.equalSet = viewModel.lastSet.rank == label.rank
                                 viewModel.currentSet = label
-                                currentOption =  label.str
+                                currentOption = label.str
                                 onOptionSelected(label.str)
                             }
                         }
@@ -227,14 +228,15 @@ fun GameScreen(
 
                                 rowLabels.forEach { label ->
 
-                                    isEnabled = if(viewModel.equalSet){
+                                    isEnabled = if (viewModel.equalSet) {
                                         viewModel.lastFirstAnswer.rank < label.rank
-                                    }else{
+                                    } else {
                                         true
                                     }
 
                                     GameButton(
-                                        label, isEnabled) {
+                                        label, isEnabled
+                                    ) {
                                         showPlayerCards = false
                                         viewModel.lastFirstAnswer = label
                                         currentPlayerIndexVar = afterChoosingSet(
@@ -242,7 +244,7 @@ fun GameScreen(
                                             navController = navController,
                                             viewModel = viewModel
                                         )
-                                        viewModel.lastSet=viewModel.currentSet
+                                        viewModel.lastSet = viewModel.currentSet
                                     }
                                 }
                             }
@@ -269,10 +271,15 @@ fun GameScreen(
 
 
                                     rowLabels.forEach { label ->
-                                         isEnabled = if(viewModel.equalSet){viewModel.lastFirstAnswer.rank < label.rank} else{true}
+                                        isEnabled = if (viewModel.equalSet) {
+                                            viewModel.lastFirstAnswer.rank <= label.rank
+                                        } else {
+                                            true
+                                        }
                                         GameButton(
-                                            label, isEnabled) {
-                                            tempFirstAnswer = label
+                                            label, isEnabled
+                                        ) {
+                                            viewModel.tempFirstAnswer = label
 //                                            viewModel.lastFirstAnswer = label
                                             firstPair = label.str
                                             secondPairVisible =
@@ -300,18 +307,44 @@ fun GameScreen(
 
 
                                     rowLabels.forEach { label ->
-                                         isEnabled = if(viewModel.equalSet){viewModel.lastSecondAnswer.rank < label.rank} else{true}
+                                        isEnabled = if (viewModel.equalSet) {
+                                            if (viewModel.tempFirstAnswer == viewModel.lastFirstAnswer) {
+                                                if (viewModel.lastSecondAnswer.rank >= label.rank) {
+                                                    false
+                                                } else if (viewModel.tempFirstAnswer.rank == label.rank) {
+                                                    false
+                                                } else {
+                                                    true
+                                                }
+                                            } else {
+                                                true
+                                            }
+                                        } else {
+                                            if (viewModel.tempFirstAnswer.rank == label.rank) {
+                                                false
+                                            } else {
+                                                true
+                                            }
+                                        }
                                         GameButton(
-                                            label, isEnabled){
-                                            viewModel.lastFirstAnswer = tempFirstAnswer
+                                            label, isEnabled
+                                        ) {
+                                            viewModel.lastFirstAnswer = viewModel.tempFirstAnswer
                                             viewModel.lastSecondAnswer = label
                                             showPlayerCards = false
+                                            if (viewModel.lastFirstAnswer.rank < viewModel.lastSecondAnswer.rank) {
+                                                biggerPair = viewModel.lastSecondAnswer
+                                                viewModel.lastSecondAnswer =
+                                                    viewModel.lastFirstAnswer
+                                                viewModel.lastFirstAnswer = biggerPair
+                                            }
                                             currentPlayerIndexVar = afterChoosingSet(
                                                 currentPlayerIndex = currentPlayerIndexVar,
                                                 navController = navController,
                                                 viewModel = viewModel
                                             )
-                                            viewModel.lastSet=viewModel.currentSet
+
+                                            viewModel.lastSet = viewModel.currentSet
                                         }
                                     }
                                 }
@@ -324,7 +357,11 @@ fun GameScreen(
 
                         val cardOptions = listOf(model.SmallOrBig.SMALL, model.SmallOrBig.BIG)
                         cardOptions.forEach { label ->
-                             isEnabled = if(viewModel.equalSet){viewModel.lastFirstAnswer.rank < label.rank} else{true}
+                            isEnabled = if (viewModel.equalSet) {
+                                viewModel.lastFirstAnswer.rank < label.rank
+                            } else {
+                                true
+                            }
                             GameButton(
                                 label, isEnabled
                             ) {
@@ -335,7 +372,7 @@ fun GameScreen(
                                     navController = navController,
                                     viewModel = viewModel
                                 )
-                                viewModel.lastSet=viewModel.currentSet
+                                viewModel.lastSet = viewModel.currentSet
                             }
                         }
                     }
@@ -358,12 +395,16 @@ fun GameScreen(
                                     // .weight(1f)
                                 ) {
                                     rowLabels.forEach { label ->
-                                         isEnabled = if(viewModel.equalSet){viewModel.lastFirstAnswer.rank < label.rank} else{true}
+                                        isEnabled = if (viewModel.equalSet) {
+                                            viewModel.lastFirstAnswer.rank <= label.rank
+                                        } else {
+                                            true
+                                        }
                                         GameButton(
                                             label, isEnabled
                                         ) {
-                                            tempFirstAnswer = label
-                                           // viewModel.lastFirstAnswer = label
+                                            viewModel.tempFirstAnswer = label
+                                            // viewModel.lastFirstAnswer = label
                                             firstPair = label.str
                                             secondPairVisible =
                                                 true
@@ -386,10 +427,29 @@ fun GameScreen(
                                     //  .weight(1f)
                                 ) {
                                     rowLabels.forEach { label ->
-                                         isEnabled = if(viewModel.equalSet){viewModel.lastFirstAnswer.rank < label.rank} else{true}
+                                        isEnabled = if (viewModel.equalSet) {
+                                            if (viewModel.tempFirstAnswer == viewModel.lastFirstAnswer) {
+                                                if (viewModel.lastSecondAnswer.rank >= label.rank) {
+                                                    false
+                                                } else if (viewModel.tempFirstAnswer.rank == label.rank) {
+                                                    false
+                                                } else {
+                                                    true
+                                                }
+                                            } else {
+                                                true
+                                            }
+                                        } else {
+                                            if (viewModel.tempFirstAnswer.rank == label.rank) {
+                                                false
+                                            } else {
+                                                true
+                                            }
+                                        }
                                         GameButton(
-                                            label, isEnabled) {
-                                            viewModel.lastFirstAnswer = tempFirstAnswer
+                                            label, isEnabled
+                                        ) {
+                                            viewModel.lastFirstAnswer = viewModel.tempFirstAnswer
                                             viewModel.lastSecondAnswer = label
                                             showPlayerCards = false
                                             currentPlayerIndexVar = afterChoosingSet(
@@ -397,7 +457,7 @@ fun GameScreen(
                                                 navController = navController,
                                                 viewModel = viewModel
                                             )
-                                            viewModel.lastSet=viewModel.currentSet
+                                            viewModel.lastSet = viewModel.currentSet
 
                                         }
                                     }
@@ -409,9 +469,18 @@ fun GameScreen(
 
                     "Flush" -> {
 
-                        val suits = listOf(model.Color.HEART,model.Color.DIAMOND, model.Color.SPADE, model.Color.CLUB)
+                        val suits = listOf(
+                            model.Color.HEART,
+                            model.Color.DIAMOND,
+                            model.Color.SPADE,
+                            model.Color.CLUB
+                        )
                         suits.forEach { label ->
-                             isEnabled = if(viewModel.equalSet){viewModel.lastFirstAnswer.rank < label.rank} else{true}
+                            isEnabled = if (viewModel.equalSet) {
+                                viewModel.lastFirstAnswer.rank < label.rank
+                            } else {
+                                true
+                            }
                             GameButton(
                                 label, isEnabled
                             ) {
@@ -422,7 +491,7 @@ fun GameScreen(
                                     navController = navController,
                                     viewModel = viewModel
                                 )
-                                viewModel.lastSet=viewModel.currentSet
+                                viewModel.lastSet = viewModel.currentSet
                             }
                         }
                     }
@@ -437,13 +506,17 @@ fun GameScreen(
                                 fontFamily = boldItalic
                             )
 
-                            val cardOptions = listOf(model.SmallOrBig.SMALL,model.SmallOrBig.BIG)
+                            val cardOptions = listOf(model.SmallOrBig.SMALL, model.SmallOrBig.BIG)
                             cardOptions.forEach { label ->
-                                 isEnabled = if(viewModel.equalSet){viewModel.lastFirstAnswer.rank < label.rank} else{true}
+                                isEnabled = if (viewModel.equalSet) {
+                                    viewModel.lastFirstAnswer.rank < label.rank
+                                } else {
+                                    true
+                                }
                                 GameButton(
                                     label, isEnabled
                                 ) {
-                                    tempFirstAnswerInFlush=label
+                                    viewModel.tempFirstAnswerInFlush = label
                                     //viewModel.lastFirstAnswer = label
                                     firstPair = label.str
                                     secondPairVisible = true
@@ -456,13 +529,22 @@ fun GameScreen(
                                 fontWeight = FontWeight.Bold,
                                 fontFamily = boldItalic
                             )
-                            val suits = listOf(model.Color.HEART, model.Color.DIAMOND, model.Color.SPADE, model.Color.CLUB)
+                            val suits = listOf(
+                                model.Color.HEART,
+                                model.Color.DIAMOND,
+                                model.Color.SPADE,
+                                model.Color.CLUB
+                            )
                             suits.forEach { label ->
-                                 isEnabled = if(viewModel.equalSet){viewModel.lastSecondAnswer.rank < label.rank} else{true}
+                                isEnabled = if (viewModel.equalSet) {
+                                    viewModel.lastSecondAnswer.rank < label.rank
+                                } else {
+                                    true
+                                }
                                 GameButton(
                                     label, isEnabled
                                 ) {
-                                    viewModel.lastFirstAnswer = tempFirstAnswerInFlush
+                                    viewModel.lastFirstAnswer = viewModel.tempFirstAnswerInFlush
                                     viewModel.lastSecondAnswer = label
                                     showPlayerCards = false
                                     currentPlayerIndexVar = afterChoosingSet(
@@ -470,7 +552,7 @@ fun GameScreen(
                                         navController = navController,
                                         viewModel = viewModel
                                     )
-                                    viewModel.lastSet=viewModel.currentSet
+                                    viewModel.lastSet = viewModel.currentSet
                                 }
                             }
                         }
@@ -483,16 +565,22 @@ fun GameScreen(
 
         }
         Button(
-            onClick = { onOptionSelected("Check")
-                      val afterCheck = AfterCheck()
-                      val pair = afterCheck.checkIfExist(viewModel.currentSet, viewModel.lastFirstAnswer, viewModel.lastSecondAnswer, viewModel.listOfPlayers[viewModel.previousUserIndex], viewModel.listOfPlayers[viewModel.currentUserIndex], viewModel.listOfCards,)
+            onClick = {
+                onOptionSelected("Check")
+                val afterCheck = AfterCheck()
+                val pair = afterCheck.checkIfExist(
+                    viewModel.currentSet,
+                    viewModel.lastFirstAnswer,
+                    viewModel.lastSecondAnswer,
+                    viewModel.listOfPlayers[viewModel.previousUserIndex],
+                    viewModel.listOfPlayers[viewModel.currentUserIndex],
+                    viewModel.listOfCards,
+                )
 
-                        viewModel.setExist = pair.second
-                        viewModel.loosingPlayer = pair.first
+                viewModel.setExist = pair.second
+                viewModel.loosingPlayer = pair.first
                 navController.navigate("whoLooseScreen")
-                      }
-
-            ,
+            },
             shape = CutCornerShape(50),
             enabled = isEnabledCheck,
             colors = ButtonDefaults.buttonColors(containerColor = if (isEnabled) Color.Red else Color.Gray),
@@ -511,7 +599,7 @@ fun GameScreen(
 
 
 @Composable
-fun GameButton(set: Rankable,  isEnabled: Boolean, onOptionSelected: (String) -> Unit) {
+fun GameButton(set: Rankable, isEnabled: Boolean, onOptionSelected: (String) -> Unit) {
     Button(
         onClick = { onOptionSelected(set.str) },
         enabled = isEnabled,
@@ -523,9 +611,6 @@ fun GameButton(set: Rankable,  isEnabled: Boolean, onOptionSelected: (String) ->
     }
 
 }
-
-
-
 
 
 fun afterChoosingSet(

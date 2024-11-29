@@ -6,7 +6,9 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import model.Card
 import model.Deck
+import model.Figure
 import model.Rankable
+import model.SmallOrBig
 import org.example.Player
 
 class GameViewModel : ViewModel() {
@@ -26,6 +28,8 @@ class GameViewModel : ViewModel() {
     var equalSet: Boolean = false
     var setExist: Boolean = false
     var loosingPlayer: Player = Player()
+    var tempFirstAnswer: Rankable = Figure.EIGHT
+    var tempFirstAnswerInFlush: SmallOrBig = SmallOrBig.SMALLER
 
     var resetState: Boolean = true
 
