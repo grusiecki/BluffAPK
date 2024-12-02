@@ -1,14 +1,9 @@
-package com.example.bluff
+package model
 
 
 import androidx.compose.runtime.mutableStateListOf
 
 import androidx.lifecycle.ViewModel
-import model.Card
-import model.Deck
-import model.Figure
-import model.Rankable
-import model.SmallOrBig
 import org.example.Player
 
 class GameViewModel : ViewModel() {
@@ -21,10 +16,10 @@ class GameViewModel : ViewModel() {
     private var _listOfPlayers = mutableStateListOf<Player>()
     val listOfPlayers: List<Player> get() = _listOfPlayers
     var listOfCards: ArrayList<Card> = ArrayList()
-    var lastSet: Rankable = model.Set.ONECARD
+    var lastSet: Rankable = Set.ONECARD
     var lastFirstAnswer: Rankable = model.Figure.EIGHT
     var lastSecondAnswer: Rankable = model.Figure.EIGHT
-    var currentSet: Rankable = model.Set.ONECARD
+    var currentSet: Rankable = Set.ONECARD
     var equalSet: Boolean = false
     var setExist: Boolean = false
     var loosingPlayer: Player = Player()
@@ -76,10 +71,10 @@ class GameViewModel : ViewModel() {
         setPreviousUserIndex(0)
 
         listOfCards = ArrayList()
-        lastSet = model.Set.ONECARD
+        lastSet = Set.ONECARD
         lastFirstAnswer = model.Figure.EIGHT
         lastSecondAnswer = model.Figure.EIGHT
-        currentSet = model.Set.ONECARD
+        currentSet = Set.ONECARD
         loosingPlayer = Player()
         resetState = true
     }
