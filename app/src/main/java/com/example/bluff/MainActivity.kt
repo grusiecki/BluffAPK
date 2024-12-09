@@ -104,7 +104,7 @@ fun AppNavigator() {
 
         composable("mainScreen") { MyScreen(navController) }
         composable("pickNumberOfPlayersScreen") { PickNumberOfPlayer(navController) }
-        composable("authScreen"){ AuthScreen(AuthViewModel()) }
+        composable("authScreen"){ AuthScreen(AuthViewModel(), navController) }
 
         composable(
             "setPlayersName/{playerCount}",
@@ -135,6 +135,10 @@ fun AppNavigator() {
         composable("endGameScreen") {
 
             EndGameScreen( navController, viewModel)
+        }
+        composable("waitingScreen") {
+
+            WaitingScreen( )
         }
         }
 
