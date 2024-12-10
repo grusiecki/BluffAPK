@@ -138,7 +138,7 @@ fun AppNavigator() {
         }
         composable("waitingScreen") {
 
-            WaitingScreen( )
+            WaitingScreen()
         }
         }
 
