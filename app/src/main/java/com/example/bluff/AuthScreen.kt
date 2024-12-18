@@ -1,12 +1,19 @@
 package com.example.bluff
 
+import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -25,6 +32,7 @@ import kotlinx.coroutines.tasks.await
 import model.AuthViewModel
 import model.User
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
@@ -49,6 +57,25 @@ fun AuthScreen(authViewModel: AuthViewModel, navController: NavController) {
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop
         )
+        IconButton(
+            onClick = {
+                navController.popBackStack()
+            },
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(16.dp)
+                .size(48.dp)
+                .clip(CircleShape)
+                .background(Color.White)
+                .border(2.dp, Color.Black, CircleShape)
+        ){
+            Icon(
+                imageVector = Icons.Default.ArrowBack,
+                contentDescription = "Back",
+                tint = Color.Black,
+                modifier = Modifier.scale(1.5f)
+            )
+        }
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -89,19 +116,24 @@ fun AuthScreen(authViewModel: AuthViewModel, navController: NavController) {
             Button(onClick = {
                 errorMessage = null // Reset error message
                 scope.launch {
-                    val result = if (isRegistering) {
-                        registerUser(email, password)
-                        authViewModel.register(email, password)
+                    if (isRegistering) {
+                        // Rejestracja
+                        val result = registerUserAndSaveToFirestore(email, password)
+                        if (result != null) { // Rejestracja powiodła się
+                            errorMessage = "Rejestracja przebiegła pomyślnie"
+                        } else {
+                            errorMessage = "Rejestracja nie powiodła się. Sprawdź dane."
+                        }
                     } else {
-                        authViewModel.login(email, password)
-                    }
-                    result?.let { errorMessage = it }
-                    if (result == null) {
-                        loginUser(email, password)
-                        updateUserStatus(true)
-                        navController.navigate("waitingScreen")
-                    } else {
-                        errorMessage = result
+                        // Logowanie
+                        val result = loginUser(email, password)
+                        if (result != null) { // Logowanie powiodło się
+                            updateUserStatus(true) // Ustaw status oczekiwania
+
+                            navController.navigate("waitingScreen") // Przekieruj do waiting screen
+                        } else {
+                            errorMessage = "Logowanie nie powiodło się. Sprawdź dane."
+                        }
                     }
                 }
             }) {
@@ -123,7 +155,7 @@ fun updateUserStatus(isWaiting: Boolean) {
     user?.let {
         val userInfo = User(userId = it.uid, email = it.email ?: "", isWaiting = isWaiting)
         val db = Firebase.firestore
-        db.collection("users").document(it.uid).set(userInfo)
+        db.collection("users").document(it.uid).update("isWaiting", isWaiting)
             .addOnSuccessListener {
                 // Udało się zaktualizować status
             }
@@ -151,3 +183,39 @@ suspend fun loginUser(email: String, password: String): FirebaseUser? {
         e.printStackTrace()
         null
     }}
+fun saveUserToFirestore(userId: String, email: String, isWaiting: Boolean) {
+    val db = Firebase.firestore
+    val userData = User(userId = userId, email = email, isWaiting = isWaiting)
+
+    Log.d("FirestoreSave", "Saving user: ID = $userId, Email = $email")
+
+    db.collection("users").document(userId).set(userData)
+        .addOnSuccessListener {
+            Log.d("FirestoreSave", "User saved: $userId")
+        }
+        .addOnFailureListener { e ->
+            Log.e("FirestoreSave", "Saved unsuccessfull: ", e)
+        }
+}
+suspend fun registerUserAndSaveToFirestore(email: String, password: String): User? {
+    val auth = FirebaseAuth.getInstance()
+    val db = FirebaseFirestore.getInstance()
+
+    return try {
+        // Rejestracja użytkownika
+        val result = auth.createUserWithEmailAndPassword(email, password).await()
+        val userId = result.user?.uid ?: return null // UID użytkownika
+
+        // Tworzenie obiektu użytkownika z isWaiting = true
+        val userData = User(userId = userId, email = email, isWaiting = false)
+
+        // Zapisywanie danych w Firestore
+        db.collection("users").document(userId).set(userData).await()
+
+        // Zwracanie zapisanego użytkownika
+        userData
+    } catch (e: Exception) {
+        e.printStackTrace() // Obsłuż błąd
+        null // Zwróć null w przypadku błędu
+    }
+}
