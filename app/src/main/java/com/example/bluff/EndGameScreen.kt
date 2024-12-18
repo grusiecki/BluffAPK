@@ -18,6 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import model.GameViewModel
 
 @Composable
 fun EndGameScreen(navController: NavController, viewModel: GameViewModel) {

@@ -1,6 +1,7 @@
 package com.example.bluff
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -31,6 +32,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.google.firebase.FirebaseApp
+import model.AuthViewModel
+import model.GameViewModel
 
 val boldItalic = FontFamily(
     Font(R.font.roboto_bold_italic)
@@ -45,6 +49,9 @@ val boldItalic = FontFamily(
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        FirebaseApp.initializeApp(this)
+//        val app = FirebaseApp.getInstance()
+//        Log.d("FirebaseApp", "Firebase initialized: ${app.name}")
         setContent {
             AppNavigator()
 
@@ -80,7 +87,10 @@ fun MyScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(onClick = { navController.navigate("pickNumberOfPlayersScreen")}) {
-                Text(text = "Start Game")
+                Text(text = "Start Offline Game")
+            }
+            Button(onClick = { navController.navigate("authScreen")}) {
+                Text(text = "Start Online Game")
             }
         }
     }
@@ -94,6 +104,7 @@ fun AppNavigator() {
 
         composable("mainScreen") { MyScreen(navController) }
         composable("pickNumberOfPlayersScreen") { PickNumberOfPlayer(navController) }
+        composable("authScreen"){ AuthScreen(AuthViewModel(), navController) }
 
         composable(
             "setPlayersName/{playerCount}",
@@ -124,6 +135,10 @@ fun AppNavigator() {
         composable("endGameScreen") {
 
             EndGameScreen( navController, viewModel)
+        }
+        composable("waitingScreen") {
+
+            WaitingScreen(navController)
         }
         }
 
